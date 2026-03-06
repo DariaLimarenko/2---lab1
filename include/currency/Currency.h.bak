@@ -1,0 +1,50 @@
+#pragma once
+
+#include <iostream>
+#include <string>
+#include <iomanip>
+#include <sstream>
+#include <cmath>
+#include <stdexcept>
+
+namespace currency {
+
+class Currency {
+private:
+    double amount;          // Сумма денег
+    std::string code;       // Код валюты ("USD", "EUR", "RUB" и т.д.)
+    
+public:
+    // Конструкторы
+    Currency();
+    Currency(double amount, const std::string& code);
+    
+    // Get методы
+    double getAmount() const;
+    std::string getCode() const;
+    
+    // Set методы
+    void setAmount(double amount);
+    void setCode(const std::string& code);
+    
+    // Публичные методы (5-6)
+    void convertTo(const std::string& newCode, double rate);
+    std::string format() const;
+    bool isSameCurrency(const Currency& other) const;
+    Currency add(const Currency& other, double rate) const;
+    double getAmountInUSD(double usdRate) const;
+    void roundToTwoDecimals();
+    
+    // Перегрузка операторов
+    bool operator==(const Currency& other) const;
+    Currency operator+(const Currency& other) const;
+    friend std::ostream& operator<<(std::ostream& os, const Currency& currency);
+    
+    // Статический метод
+    static std::string getSymbol(const std::string& code);
+    
+    // Метод для вывода состояния
+    void print() const;
+};
+
+} // namespace currency

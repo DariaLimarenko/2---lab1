@@ -1,0 +1,123 @@
+#include "currency/Currency.h"
+
+namespace currency {
+
+// Конструктор по умолчанию
+Currency::Currency() : amount(0.0), code("USD") {}
+
+// Конструктор с параметрами
+Currency::Currency(double amount, const std::string& code)
+    : amount(amount), code(code) {}
+
+// Get методы
+double Currency::getAmount() const {
+    return amount;
+}
+
+std::string Currency::getCode() const {
+    return code;
+}
+
+// Set методы
+void Currency::setAmount(double amount) {
+    this->amount = amount;
+}
+
+void Currency::setCode(const std::string& code) {
+    this->code = code;
+}
+
+// Конвертация в другую валюту по курсу
+void Currency::convertTo(const std::string& newCode, double rate) {
+    if (rate > 0) {
+        amount = amount * rate;
+        code = newCode;
+    } else {
+        throw std::invalid_argument("Exchange rate must be positive");
+    }
+}
+
+// Форматирование строки с символом валюты
+std::string Currency::format() const {
+    std::string symbol = getSymbol(code);
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(2);
+    ss << symbol << amount;
+    return ss.str();
+}
+
+// Проверка одинаковой валюты
+bool Currency::isSameCurrency(const Currency& other) const {
+    return code == other.code;
+}
+
+// Сложение с конвертацией (если валюты разные)
+Currency Currency::add(const Currency& other, double rate) const {
+    if (code == other.code) {
+        return Currency(amount + other.amount, code);
+    } else {
+        // Конвертируем другую валюту в текущую
+        double convertedAmount = other.amount * rate;
+        return Currency(amount + convertedAmount, code);
+    }
+}
+
+// Получение суммы в USD по курсу
+double Currency::getAmountInUSD(double usdRate) const {
+    if (code == "USD") {
+        return amount;
+    }
+    if (usdRate > 0) {
+        return amount / usdRate;
+    }
+    throw std::invalid_argument("USD rate must be positive");
+}
+
+// Округление до двух знаков после запятой
+void Currency::roundToTwoDecimals() {
+    amount = std::round(amount * 100.0) / 100.0;
+}
+
+// Перегрузка оператора ==
+bool Currency::operator==(const Currency& other) const {
+    return (code == other.code && std::abs(amount - other.amount) < 0.001);
+}
+
+// Перегрузка оператора + (только для одинаковых валют)
+Currency Currency::operator+(const Currency& other) const {
+    if (code != other.code) {
+        throw std::runtime_error("Cannot add different currencies without exchange rate");
+    }
+    return Currency(amount + other.amount, code);
+}
+
+// Перегрузка оператора <<
+std::ostream& operator<<(std::ostream& os, const Currency& currency) {
+    os << currency.format() << " (" << currency.code << ")";
+    return os;
+}
+
+// Статический метод: получение символа валюты
+std::string Currency::getSymbol(const std::string& code) {
+    if (code == "USD") return "$";
+    if (code == "EUR") return "€";
+    if (code == "GBP") return "£";
+    if (code == "JPY") return "¥";
+    if (code == "RUB") return "₽";
+    if (code == "CNY") return "¥";
+    if (code == "INR") return "₹";
+    if (code == "KRW") return "₩";
+    return code; // Если символ неизвестен, возвращаем код
+}
+
+// Метод для вывода состояния
+void Currency::print() const {
+    std::cout << "=== Currency Information ===" << std::endl;
+    std::cout << "Formatted: " << format() << std::endl;
+    std::cout << "Code: " << code << std::endl;
+    std::cout << "Amount: " << std::fixed << std::setprecision(2) << amount << std::endl;
+    std::cout << "Symbol: " << getSymbol(code) << std::endl;
+    std::cout << "============================" << std::endl;
+}
+
+} // namespace currency
